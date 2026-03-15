@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - casacraft-network
+    restart: always
+
+  # Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend-service
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/casacraft
+      - JWT_SECRET=casacraft_secret_key_2026
+      - PORT=5000
+      - NODE_ENV=production
+    depends_on:
+      - mongo
+    networks:
+      - casacraft-network
+    restart: always
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend-service
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - casacraft-network
+    restart: always
+
+# Definition of Shared Network
+networks:
+  casacraft-network:
+    driver: bridge
+
+# Persistent Volumes for MongoDB
+volumes:
+  mongo-data:
+    driver: local
