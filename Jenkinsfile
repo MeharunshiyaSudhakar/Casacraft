@@ -1,7 +1,3 @@
-```groovy
-pipeline {
-    agent any
-
     stages {
 
         stage('Check Docker') {
@@ -59,4 +55,3 @@ pipeline {
             echo "Pipeline Failed"
         }
     }
-}
