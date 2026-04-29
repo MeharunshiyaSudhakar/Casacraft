@@ -19,16 +19,19 @@ node {
     }
 
     stage('Wait for Services') {
-        sleep 20
+        sleep 25
     }
 
     stage('Health Check') {
+        def url = "http://localhost:5001/api/health"  // change if needed
+
         try {
-            sh 'curl -f http://localhost:5001/api/health'
-            echo "Backend OK"
+            sh "curl -f ${url}"
+            echo "✅ Backend OK"
         } catch (e) {
+            echo "Retrying..."
             sleep 10
-            sh 'curl -f http://localhost:5001/api/health'
+            sh "curl -f ${url}"
         }
     }
 
