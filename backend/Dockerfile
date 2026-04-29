@@ -11,11 +11,11 @@ RUN npm install --production
 COPY . .
 
 # Environment variables (can be overridden by docker-compose)
-ENV PORT=5000
+ENV PORT=5001
 ENV NODE_ENV=production
 
 # Expose the port the app runs on
-EXPOSE 5000
+EXPOSE 5001
 
 # Start the application
 CMD ["npm", "start"]

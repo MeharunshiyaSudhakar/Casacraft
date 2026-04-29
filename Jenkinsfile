@@ -24,11 +24,11 @@ node {
 
     stage('Health Check') {
         try {
-            sh 'curl -f http://localhost:5000/api/health'
+            sh 'curl -f http://localhost:5001/api/health'
             echo "Backend OK"
         } catch (e) {
             sleep 10
-            sh 'curl -f http://localhost:5000/api/health'
+            sh 'curl -f http://localhost:5001/api/health'
         }
     }
 
