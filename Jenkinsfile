@@ -1,65 +1,98 @@
 pipeline {
-    agent any
+agent any
 
-    /* 
-       Environment configuration can be added here if needed, 
-       such as Docker Registry credentials.
-    */
-    environment {
-        APP_NAME = "casacraft-mern"
-    }
+```
+environment {
+    APP_NAME = "casacraft-mern"
+}
 
-    stages {
-        // Stage 1: Clone the repository
-        stage('Clone Repository') {
-            steps {
-                echo 'Cleaning workspace and cloning the latest code from GitHub...'
-                // 'checkout scm' automatically uses the Git configuration defined in the Jenkins job
-                checkout scm
-            }
-        }
+stages {
 
-        // Stage 2: Build Docker images using Docker Compose
-        stage('Build Docker Images') {
-            steps {
-                echo 'Building backend and frontend Docker images...'
-                // Using docker-compose build to generate images based on docker-compose.yml
-                sh 'docker-compose build'
-            }
-        }
-
-        // Stage 3: Run the application using Docker Compose
-        stage('Run Containers') {
-            steps {
-                echo 'Stopping existing containers and starting new ones in detached mode...'
-                // Ensure a clean state by stopping old containers before starting new ones
-                sh 'docker-compose down'
-                sh 'docker-compose up -d'
-            }
-        }
-
-        // Stage 4: Verify the deployment
-        stage('Verify Deployment') {
-            steps {
-                echo 'Verifying that all services are running...'
-                // List all running containers to confirm successes
-                sh 'docker ps'
-                
-                // Optional: Wait for services to fully initialize and check API health
-                echo 'Waiting for services to initialize...'
-                sleep 10
-                sh 'curl -f http://localhost:5000/api/health || echo "Backend check failed, but continuing..."'
-            }
+    stage('Check Docker') {
+        steps {
+            echo 'Checking Docker installation...'
+            sh 'docker --version'
+            sh 'docker-compose --version'
         }
     }
 
-    // Post-pipeline actions for notifications or cleanup
-    post {
-        success {
-            echo "CI/CD Pipeline successful! Application is live at http://localhost:3000"
-        }
-        failure {
-            echo "Pipeline failed. Check Jenkins logs for details."
+    stage('Clean Old Containers') {
+        steps {
+            echo 'Cleaning existing containers and networks...'
+            sh 'docker-compose down --remove-orphans || true'
+            sh 'docker system prune -f || true'
         }
     }
+
+    stage('Build Images') {
+        steps {
+            echo 'Building Docker images...'
+            sh 'docker-compose build'
+        }
+    }
+
+    stage('Run Containers') {
+        steps {
+            echo 'Starting containers...'
+            sh 'docker-compose up -d'
+        }
+    }
+
+    stage('Wait for Services') {
+        steps {
+            echo 'Waiting for services to initialize...'
+            sleep 25
+        }
+    }
+
+    stage('Verify Deployment') {
+        steps {
+            echo 'Verifying backend health...'
+            script {
+                def retries = 3
+                def success = false
+
+                for (int i = 1; i <= retries; i++) {
+                    try {
+                        sh 'curl -f http://localhost:5000/api/health'
+                        echo "✅ Backend is healthy"
+                        success = true
+                        break
+                    } catch (Exception e) {
+                        echo "⚠️ Attempt ${i} failed. Retrying in 10 seconds..."
+                        sleep 10
+                    }
+                }
+
+                if (!success) {
+                    error "❌ Backend health check failed after multiple attempts"
+                }
+            }
+        }
+    }
+
+    stage('Show Running Containers') {
+        steps {
+            echo 'Listing running containers...'
+            sh 'docker ps'
+        }
+    }
+}
+
+post {
+    success {
+        echo "🎉 Deployment Successful!"
+        echo "Frontend → http://localhost:3000"
+        echo "Backend → http://localhost:5000/api/health"
+    }
+    failure {
+        echo "❌ Pipeline Failed. Check logs above."
+        sh 'docker-compose logs || true'
+    }
+    always {
+        echo "📌 Pipeline execution completed."
+    }
+}
+```
+
 }
