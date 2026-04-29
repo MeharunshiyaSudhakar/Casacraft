@@ -1,50 +1,35 @@
 services:
-  # MongoDB Database Service
   mongo:
     image: mongo:latest
+    ports:
+      - "27017:27017"
     volumes:
       - mongo-data:/data/db
     networks:
       - casacraft-network
-    restart: always
 
-  # Backend Service
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: ./backend
     ports:
       - "5001:5001"
     environment:
       - MONGODB_URI=mongodb://mongo:27017/casacraft
-      - JWT_SECRET=casacraft_secret_key_2026
-      - PORT=5001
-      - NODE_ENV=production
     depends_on:
       - mongo
     networks:
       - casacraft-network
-    restart: always
 
-  # Frontend Service
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    build: ./frontend
     ports:
       - "3001:3001"
     depends_on:
       - backend
     networks:
       - casacraft-network
-    restart: always
 
-# Shared Network
 networks:
   casacraft-network:
-    driver: bridge
 
-# Persistent Volume
 volumes:
   mongo-data:
-    driver: local

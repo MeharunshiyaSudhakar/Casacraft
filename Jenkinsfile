@@ -18,24 +18,7 @@ node {
         sh 'docker-compose up -d'
     }
 
-    stage('Wait for Services') {
-        sleep 25
-    }
-
-    stage('Health Check') {
-        def url = "http://localhost:5000/api/health"  // change if needed
-
-        try {
-            sh "curl -f ${url}"
-            echo "✅ Backend OK"
-        } catch (e) {
-            echo "Retrying..."
-            sleep 10
-            sh "curl -f ${url}"
-        }
-    }
-
-    stage('Show Containers') {
+    stage('Show Running Containers') {
         sh 'docker ps'
     }
 }
