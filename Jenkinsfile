@@ -1,16 +1,3 @@
-
-👉 Even **ONE backtick is enough to break Jenkins**
-
----
-
-# 🚀 ✅ FINAL CLEAN FIX (FASTEST WAY)
-
-Instead of hunting line 88 manually, just **replace your entire Jenkinsfile with a clean version**
-
----
-
-## ✅ COPY THIS FULL CLEAN JENKINSFILE (NO BACKTICKS)
-
 ```groovy
 pipeline {
     agent any
