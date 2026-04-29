@@ -1,11 +1,3 @@
-pipeline {
-agent any
-
-```
-environment {
-    APP_NAME = "casacraft-mern"
-}
-
 stages {
 
     stage('Check Docker') {
