@@ -23,7 +23,7 @@ node {
     }
 
     stage('Health Check') {
-        def url = "http://localhost:5001/api/health"  // change if needed
+        def url = "http://localhost:5000/api/health"  // change if needed
 
         try {
             sh "curl -f ${url}"
