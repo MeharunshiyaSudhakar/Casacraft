@@ -14,7 +14,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "5001:5000"
+      - "5002:5000"
     environment:
       - MONGODB_URI=mongodb://mongo:27017/casacraft
       - JWT_SECRET=casacraft_secret_key_2026
